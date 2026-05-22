@@ -20,7 +20,7 @@
 #     scp D:\Git\RHEL_CertVM_Setup\Setup-RHEL10-Cert.sh root@<VM_IP>:/root/
 #
 # (B) 在 VM 內直接 curl (需先 push 到 GitHub)：
-#     curl -fLO https://raw.githubusercontent.com/<USER>/RHEL_CertVM_Setup/main/Setup-RHEL10-Cert.sh
+#     curl -fLO https://raw.githubusercontent.com/howlin0811/RHEL_CertVM_Setup/main/Setup-RHEL10-Cert.sh
 #
 # (C) 挨載 ISO / VHDX 複製進 VM。
 #

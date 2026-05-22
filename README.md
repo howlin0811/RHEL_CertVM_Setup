@@ -35,13 +35,13 @@
 
 ## 三種使用方式
 
-下面範例請把 `<USER>` 換成你的 GitHub 帳號；branch 若不是 `main` 也請對應修改。
+以下範例使用 `howlin0811/RHEL_CertVM_Setup`（`main` branch）；fork 另外維護者請自行替換 URL。
 
 ### 方案 A — 一行下載並執行（最快）
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$url = 'https://raw.githubusercontent.com/<USER>/RHEL_CertVM_Setup/main/Setup-RHELCertVM.ps1'
+$url = 'https://raw.githubusercontent.com/howlin0811/RHEL_CertVM_Setup/main/Setup-RHELCertVM.ps1'
 iex (iwr -UseBasicParsing $url).Content
 ```
 
@@ -49,7 +49,7 @@ iex (iwr -UseBasicParsing $url).Content
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$url    = 'https://raw.githubusercontent.com/<USER>/RHEL_CertVM_Setup/main/Setup-RHELCertVM.ps1'
+$url    = 'https://raw.githubusercontent.com/howlin0811/RHEL_CertVM_Setup/main/Setup-RHELCertVM.ps1'
 $script = (iwr -UseBasicParsing $url).Content
 & ([scriptblock]::Create($script)) -IsoDirectory 'C:\Users\Administrator\Downloads' -VhdSizeGB 200
 ```
@@ -59,7 +59,7 @@ $script = (iwr -UseBasicParsing $url).Content
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$url = 'https://raw.githubusercontent.com/<USER>/RHEL_CertVM_Setup/main/Setup-RHELCertVM.ps1'
+$url = 'https://raw.githubusercontent.com/howlin0811/RHEL_CertVM_Setup/main/Setup-RHELCertVM.ps1'
 $tmp = Join-Path $env:TEMP 'Setup-RHELCertVM.ps1'
 Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $tmp
 
@@ -72,7 +72,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 ### 方案 C — Clone 整個 repo（推薦長期使用）
 
 ```powershell
-git clone https://github.com/<USER>/RHEL_CertVM_Setup.git C:\Tools\RHEL_CertVM_Setup
+git clone https://github.com/howlin0811/RHEL_CertVM_Setup.git C:\Tools\RHEL_CertVM_Setup
 cd C:\Tools\RHEL_CertVM_Setup
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 .\Setup-RHELCertVM.ps1
@@ -157,7 +157,7 @@ SUT 仍會被建立，但 **沒有** passthrough disk，會印一條 warning。
   ```
 - **在 VM 內直接下載** (已 push 到 GitHub)：
   ```bash
-  curl -fLO https://raw.githubusercontent.com/<USER>/RHEL_CertVM_Setup/main/Setup-RHEL10-Cert.sh
+  curl -fLO https://raw.githubusercontent.com/howlin0811/RHEL_CertVM_Setup/main/Setup-RHEL10-Cert.sh
   ```
 - **挨載 ISO / VHDX** 複製進去。
 
