@@ -28,9 +28,11 @@
 # Usage (在 VM 內)
 # -----------------------------------------------------------------------------
 #   chmod +x Setup-RHEL10-Cert.sh
-#   sudo ./Setup-RHEL10-Cert.sh                 # 預設 HOSTTYPE=x86_64
-#   sudo ./Setup-RHEL10-Cert.sh aarch64         # 位置參數指定 HOSTTYPE
-#   sudo HOSTTYPE=x86_64 ./Setup-RHEL10-Cert.sh # 用環境變數帶入
+#   sudo ./Setup-RHEL10-Cert.sh                              # 預設 HOSTTYPE=x86_64，互動詢問 hostname
+#   sudo ./Setup-RHEL10-Cert.sh aarch64                      # 位置參數指定 HOSTTYPE
+#   sudo HOSTTYPE=x86_64 ./Setup-RHEL10-Cert.sh              # 用環境變數帶入 HOSTTYPE
+#   sudo NEW_HOSTNAME=sut01.lab ./Setup-RHEL10-Cert.sh       # 用環境變數帶入 hostname (跳過互動)
+#   sudo NEW_HOSTNAME=keep ./Setup-RHEL10-Cert.sh            # 維持現有 hostname 不變
 #
 # 要完全自動化 (不要互動輸入 RHN 帳密)，把腳本裡的
 #   subscription-manager register
@@ -82,6 +84,41 @@ echo " RHEL ${VERSION} cert VM post-install setup"
 echo " Cert repo  : ${CERT_REPO}"
 echo " Debug repo : ${DEBUG_REPO}"
 echo "==============================================================="
+
+# -----------------------------------------------------------------------------
+# Step 0: 設定 hostname (在註冊前先改，subscription-manager 上看到的會是新名稱)
+# -----------------------------------------------------------------------------
+echo ""
+echo "=== Step 0/3: set hostname ==="
+CURRENT_HOSTNAME="$(hostnamectl --static 2>/dev/null || hostname)"
+echo "目前 hostname: ${CURRENT_HOSTNAME}"
+
+# 可用環境變數 NEW_HOSTNAME 跳過互動：
+#   NEW_HOSTNAME=sut01.lab   -> 直接改成這個
+#   NEW_HOSTNAME=keep        -> 不改，沿用目前 hostname
+NEW_HOSTNAME="${NEW_HOSTNAME:-}"
+if [[ -z "${NEW_HOSTNAME}" ]]; then
+    read -r -p "請輸入新的 hostname (直接 Enter 保持「${CURRENT_HOSTNAME}」不變): " NEW_HOSTNAME || true
+fi
+
+if [[ -z "${NEW_HOSTNAME}" || "${NEW_HOSTNAME}" == "keep" || "${NEW_HOSTNAME}" == "${CURRENT_HOSTNAME}" ]]; then
+    echo "保持現有 hostname：${CURRENT_HOSTNAME}"
+else
+    # 基本格式檢查 (允許字母/數字/'-'/'_'/'.'，長度 1~253；底線雖不符 RFC 1123，但 Linux 實務常用)
+    if [[ ! "${NEW_HOSTNAME}" =~ ^[A-Za-z0-9]([A-Za-z0-9._-]{0,251}[A-Za-z0-9])?$ ]]; then
+        echo "ERROR: hostname 格式不正確：${NEW_HOSTNAME}" >&2
+        exit 1
+    fi
+    echo "套用新 hostname：${NEW_HOSTNAME}"
+    hostnamectl set-hostname "${NEW_HOSTNAME}"
+    # 同步更新 /etc/hosts 的 127.0.1.1 條目 (若沒有就追加一筆)
+    if grep -qE '^[[:space:]]*127\.0\.1\.1[[:space:]]' /etc/hosts; then
+        sed -i -E "s|^([[:space:]]*127\.0\.1\.1[[:space:]]+).*$|\1${NEW_HOSTNAME}|" /etc/hosts
+    else
+        echo "127.0.1.1 ${NEW_HOSTNAME}" >> /etc/hosts
+    fi
+    echo "新 hostname 已生效：$(hostnamectl --static)"
+fi
 
 # -----------------------------------------------------------------------------
 # Step 1: 註冊到 Red Hat
